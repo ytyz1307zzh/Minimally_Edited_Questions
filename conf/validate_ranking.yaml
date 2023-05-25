@@ -1,0 +1,35 @@
+defaults:
+  - encoder: hf_bert # defines encoder initialization parameters
+
+# Path to the test set
+test_file:
+
+# Batch size to generate query embeddings
+batch_size: 32
+
+# The total number of passages considered in pair-wise ranking
+num_ctxs: 100
+
+# Whether to lower case the input text. Set True for uncased models, False for the cased ones.
+do_lower_case: True
+
+# Saved model checkpoint
+model_file:
+
+# Output file path
+out_file:
+
+# tokens which won't be slit by tokenizer
+special_tokens:
+
+# Configurations for distributed training on gpus
+local_rank: -1
+device:
+distributed_world_size:
+cuda:
+no_cuda: False
+n_gpu:
+fp16: False
+# For fp16: Apex AMP optimization level selected in ['O0', 'O1', 'O2', and 'O3']."
+#        "See details at https://nvidia.github.io/apex/amp.html
+fp16_opt_level: O1

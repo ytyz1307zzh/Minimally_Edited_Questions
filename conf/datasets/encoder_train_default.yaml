@@ -1,0 +1,25 @@
+# @package _group_
+
+nq_train:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: dataset/train/nq-train-dpr.json
+
+nq_dev:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: dataset/dev/nq-dev-dpr.jsonl
+
+nq_dev_2k:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: dataset/dev/nq-dev-dpr-2k.jsonl
+
+ambigqa_dev:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: dataset/dev/ambigqa-dev-dpr.jsonl
+
+surge_dev:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: dataset/dev/surge-dev-dpr.jsonl
+
+nq_contrast_33k_train:
+  _target_: dpr.data.biencoder_data.JsonQADataset
+  file: dataset/train/nq-contrastive-augment-train-dpr.jsonl

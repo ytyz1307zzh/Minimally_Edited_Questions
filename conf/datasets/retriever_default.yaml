@@ -1,0 +1,13 @@
+# @package _group_
+
+nq_test:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: data.retriever.qas.nq-test
+
+surge_test:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: dataset/retrieval/MEQ_gpt_retrieval.tsv
+
+ambigqa_test:
+  _target_: dpr.data.retriever_data.CsvQASrc
+  file: dataset/retrieval/MEQ_ambigqa_retrieval_intrain.tsv
