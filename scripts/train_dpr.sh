@@ -1,25 +1,24 @@
-LR=1e-5
+LR=1e-5  # learning rate
 
-DATA_DIR=dataset
-OUTPUT_DIR=checkpoints
-BATCH_IDX=dataset/contrastive-augment-33k-train-batches64_idx.jsonl
+DATA_DIR=dataset  # directory of the data
+OUTPUT_DIR=checkpoints  # directory of saving checkpoints & results
+BATCH_IDX=dataset/train/contrastive-augment-33k-train-batches64_idx.jsonl  # pre-computed data indices of each batch
 
 BATCH=16
 DEV_BATCH=8
 EPOCHS=40
 N_GPUS=4
-QUESTION_LOSS=$2
-HINGE_MARGIN=$3
-CONTRAST_LOSS=$4
-CONTRAST_START_EPOCH=$5
+QUESTION_LOSS=$2  # options: contrastive, hinge, dot
+HINGE_MARGIN=$3  # the "alpha" in the triplet loss as described in the paper
+CONTRAST_LOSS=$4  # the weight of the query-side contrastive loss
+CONTRAST_START_EPOCH=$5  # the epoch to start the contrastive loss, 0 means starting from beginning
 TOTAL_BATCH=$((BATCH * N_GPUS))
 
+# The directory of saving this run
 CKPT_NAME="MEQ_${QUESTION_LOSS}_batch${TOTAL_BATCH}_lr${LR}_epoch${EPOCHS}_loss${CONTRAST_LOSS}_margin${HINGE_MARGIN}_start${CONTRAST_START_EPOCH}"
 
-# If train directly from HF's pre-trained BERT, remove the model_file argument
-# If wanna use fp16 in training, add fp16=True in arguments
-# train.contrast_start_epoch=${CONTRAST_START_EPOCH}
-# train.hinge_margin=${HINGE_MARGIN}
+# DPR model training
+
 option1="
    train_datasets=[nq_contrast_33k_train]
    dev_datasets=[nq_dev_2k,ambigqa_dev,surge_dev]
@@ -50,6 +49,8 @@ cmd1="python -m torch.distributed.launch --nproc_per_node=${N_GPUS} train_dense_
 echo $cmd1
 eval $cmd1
 
+# Ranking evaluation
+
 cmd2="CUDA_VISIBLE_DEVICES=0 python validate_single_ranking.py
     test_file=${DATA_DIR}/ranking/nq-test-ranking.json
     model_file=${OUTPUT_DIR}/${CKPT_NAME}/dpr_biencoder_best_0.model
@@ -78,6 +79,8 @@ cmd2="CUDA_VISIBLE_DEVICES=0 python validate_single_ranking.py
 echo $cmd2
 eval $cmd2
 
+# Generate passage embeddings for Wiki passages
+
 option3="
     model_file=${OUTPUT_DIR}/${CKPT_NAME}/dpr_biencoder_best_2.model
     ctx_src=wikipedia
@@ -92,6 +95,8 @@ cmd3="python -m torch.distributed.launch --nproc_per_node=${N_GPUS} generate_den
 
 echo $cmd3
 eval $cmd3
+
+# Retrieve Wiki passages for each question
 
 option4="
     model_file=${OUTPUT_DIR}/${CKPT_NAME}/dpr_biencoder_best_2.model
@@ -108,10 +113,14 @@ cmd4="python dense_retriever.py ${option4}"
 echo $cmd4
 eval $cmd4
 
+# Evaluate the retrieval results
+
 cmd5="python evaluate/passage_hit_and_overlap.py -retrieval ${OUTPUT_DIR}/${CKPT_NAME}/surge_test_wikipedia_output.json"
 
 echo $cmd5
 eval $cmd5
+
+# Repeat steps 3-5 for the AmbigQA contrast set
 
 option3="
     model_file=${OUTPUT_DIR}/${CKPT_NAME}/dpr_biencoder_best_1.model

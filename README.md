@@ -2,6 +2,7 @@
 
 This repository contains the data and code for the paper [*Exploring Contrast Consistency of Open-Domain Question Answering Systems on Minimally Edited Questions*](https://arxiv.org/pdf/2305.14441.pdf) in TACL 2023. In this study, we explored the problem of contrast consistency in open-domain question answering by collecting **M**inimally **E**dited **Q**uestions (MEQs) as challenging contrast sets to the popular Natural Questions (NQ) benchmark, in addition to its standard test set. Through our experiments, we find that the widely used dense passage retrieval (DPR) model performs poorly on distinguishing training questions and their minimally-edited contrast set questions. Moving a step forward, we improved the contrast consistency of DPR model via data augmentation and a query-side contrastive learning objective.
 
+<center><img src="figures/Example.png" alt="Example" width="478" height="505"></center>
 
 ### Data
 
@@ -13,9 +14,13 @@ Data can be found at [this Google Drive link](https://drive.google.com/drive/fol
 - `dataset/train` contains the training data and the batch data indices for the model. `nq-contrastive-augment-train-dpr.jsonl` is the data used to train the model, including the original NQ data and augmented MEQs from PAQ. `contrastive-augment-33k-train-batches64_idx.jsonl` is the pre-computed data indices for each batch during the training process. This is used to carefully schedule the positive and negative questions used in the query-side contrastive loss. This data can be used for training on 1, 2 or 4 GPUs. If you are using 8 GPUs, use `contrastive-augment-33k-train-batches64_idx-8gpu.jsonl` instead (a re-arranged version of the same indices).
 - `dataset/dev` dev set data used in training the model.
 
+<center><img src="figures/data_example.png" alt="Model" width="618" height=269"></center>
+
 ### Model
 
 Besides the data, this repo also contains the code of training the improved DPR model mentioned in the paper, which is equipped with additional augmented data from PAQ and a query-side contrastive learning objective. The pipeline of "training the model + generating Wikipedia passage embeddings + retrieving passages from Wikipedia + evaluating the retrieval results" is in `scripts/train_dpr.sh`.
+
+<center><img src="figures/framework.png" alt="Model" width="650" height="335"></center>
 
 ### Environment
 
