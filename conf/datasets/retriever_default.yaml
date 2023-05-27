@@ -4,7 +4,7 @@ nq_test:
   _target_: dpr.data.retriever_data.CsvQASrc
   file: data.retriever.qas.nq-test
 
-surge_test:
+gpt_test:
   _target_: dpr.data.retriever_data.CsvQASrc
   file: dataset/retrieval/MEQ_gpt_retrieval.tsv
 

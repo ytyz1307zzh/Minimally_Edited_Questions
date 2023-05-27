@@ -8,20 +8,21 @@ BATCH=16
 DEV_BATCH=8
 EPOCHS=40
 N_GPUS=4
-QUESTION_LOSS=$2  # options: contrastive, hinge, dot
-HINGE_MARGIN=$3  # the "alpha" in the triplet loss as described in the paper
-CONTRAST_LOSS=$4  # the weight of the query-side contrastive loss
-CONTRAST_START_EPOCH=$5  # the epoch to start the contrastive loss, 0 means starting from beginning
+QUESTION_LOSS=$1  # options: contrastive, hinge, dot
+HINGE_MARGIN=$2  # the "alpha" in the triplet loss as described in the paper
+CONTRAST_LOSS=$3  # the weight of the query-side contrastive loss
+CONTRAST_START_EPOCH=$4  # the epoch to start the contrastive loss, 0 means starting from beginning
 TOTAL_BATCH=$((BATCH * N_GPUS))
 
 # The directory of saving this run
 CKPT_NAME="MEQ_${QUESTION_LOSS}_batch${TOTAL_BATCH}_lr${LR}_epoch${EPOCHS}_loss${CONTRAST_LOSS}_margin${HINGE_MARGIN}_start${CONTRAST_START_EPOCH}"
 
 # DPR model training
+# For BERT-large, add option encoder.pretrained_model_cfg=bert-large-uncased
 
 option1="
    train_datasets=[nq_contrast_33k_train]
-   dev_datasets=[nq_dev_2k,ambigqa_dev,surge_dev]
+   dev_datasets=[nq_dev_2k,ambigqa_dev,gpt_dev]
    batched_example_idx=${BATCH_IDX}
    train=biencoder_nq
    train.num_train_epochs=${EPOCHS}
@@ -71,7 +72,7 @@ echo $cmd2
 eval $cmd2
 
 cmd2="CUDA_VISIBLE_DEVICES=0 python validate_single_ranking.py
-    test_file=${DATA_DIR}/ranking/surge-ranking.json
+    test_file=${DATA_DIR}/ranking/gpt-ranking.json
     model_file=${OUTPUT_DIR}/${CKPT_NAME}/dpr_biencoder_best_2.model
     batch_size=128
     num_ctxs=50"
@@ -100,10 +101,10 @@ eval $cmd3
 
 option4="
     model_file=${OUTPUT_DIR}/${CKPT_NAME}/dpr_biencoder_best_2.model
-    qa_dataset=surge_test
+    qa_dataset=gpt_test
     ctx_datatsets=[wikipedia]
     encoded_ctx_files=[\"${OUTPUT_DIR}/${CKPT_NAME}/dpr_embedding_2.wikipedia_*\"]
-    out_file=${OUTPUT_DIR}/${CKPT_NAME}/surge_test_wikipedia
+    out_file=${OUTPUT_DIR}/${CKPT_NAME}/gpt_test_wikipedia
     batch_size=32
     validation_workers=4
 "
@@ -115,7 +116,7 @@ eval $cmd4
 
 # Evaluate the retrieval results
 
-cmd5="python evaluate/passage_hit_and_overlap.py -retrieval ${OUTPUT_DIR}/${CKPT_NAME}/surge_test_wikipedia_output.json"
+cmd5="python evaluate/passage_hit_and_overlap.py -retrieval ${OUTPUT_DIR}/${CKPT_NAME}/gpt_test_wikipedia_output.json"
 
 echo $cmd5
 eval $cmd5
